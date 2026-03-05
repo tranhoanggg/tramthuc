@@ -23,12 +23,8 @@ export default function Home() {
       <div className="home-container">
         {/* CỘT TRÁI: Đứng im (Sticky) */}
         <div className="left-column">
-          <h1 className="left-title">
-            Đặt món nhanh gọn,
-            <br />
-            chọn lựa thoả thích
-          </h1>
-          <p className="left-subtitle">Sẵn Sàng Phục Vụ Từ 7:00 - 22:00</p>
+          <h1 className="left-title">Đặt món nhanh gọn, chọn lựa thoả thích</h1>
+          <p className="left-subtitle">Sẵn sàng phục vụ từ 7:00 - 22:00</p>
 
           <div className="search-box">
             <input type="text" placeholder="Tìm đồ uống, món ăn nhẹ..." />

@@ -45,7 +45,7 @@ const BestSellers = () => {
   return (
     <div className="bestsellers-container">
       <div className="bestsellers-header">
-        <h2>🔥 Bán Chạy Nhất</h2>
+        <h2>Bán chạy nhất</h2>
         <a href="#" className="view-all">
           Xem tất cả
         </a>

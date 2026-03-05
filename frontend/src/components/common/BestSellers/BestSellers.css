@@ -97,6 +97,7 @@
   /* Kỹ thuật cắt chữ nếu quá 2 dòng */
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
