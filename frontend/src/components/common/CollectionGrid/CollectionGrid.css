@@ -1,0 +1,87 @@
+.collection-container {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  /* Chiếm hết chiều rộng của cột phải */
+  width: 100%;
+}
+
+.collection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.collection-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+}
+
+.view-all {
+  font-size: 14px;
+  color: #007bff; /* Có thể đổi sang màu đồng #C17A54 của Trạm Thức */
+  text-decoration: none;
+}
+
+.view-all:hover {
+  text-decoration: underline;
+}
+
+/* Lưới 2x2 giống hệt ShopeeFood */
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.collection-card {
+  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #ebebeb;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.collection-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.collection-image-wrapper {
+  width: 100%;
+  height: 140px; /* Độ cao cố định cho ảnh */
+  overflow: hidden;
+}
+
+.collection-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.collection-info {
+  padding: 12px;
+}
+
+.collection-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.collection-subtitle {
+  font-size: 12px;
+  color: #007bff; /* Hoặc màu đồng của Trạm Thức */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
