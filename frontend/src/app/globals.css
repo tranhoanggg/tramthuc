@@ -1,11 +1,19 @@
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
-  padding: 0;
   margin: 0;
+  padding: 0;
 }
 
 body {
   font-family: Arial, Helvetica, sans-serif;
   background-color: #f9f9f9;
   color: #333;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-bottom: var(--nav-mobile-height, 70px);
+  }
 }

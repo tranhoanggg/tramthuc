@@ -4,7 +4,7 @@
   padding: 20px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   width: 100%;
-  margin-top: 20px; /* Cách một đoạn so với CollectionGrid ở trên */
+  margin-top: 20px;
 }
 
 .bestsellers-header {
@@ -18,47 +18,48 @@
   font-size: 20px;
   font-weight: 700;
   color: #333;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
-/* Chia 3 cột cho danh sách sản phẩm */
+.view-all {
+  font-size: 14px;
+  color: #007bff;
+  text-decoration: none;
+}
+
 .bestsellers-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr;
   gap: 16px;
 }
 
 .product-card {
   border: 1px solid #ebebeb;
   border-radius: 8px;
-  overflow: hidden;
   background-color: #fff;
+  display: flex;
+  flex-direction: row;
+  padding: 12px;
+  gap: 16px;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
-  display: flex;
-  flex-direction: column;
 }
 
 .product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
   border-color: #e0e0e0;
 }
 
 .product-image-wrapper {
   position: relative;
-  width: 100%;
-  padding-top: 100%; /* Kỹ thuật tạo khung ảnh vuông tỷ lệ 1:1 */
+  flex: 0 0 120px;
+  height: 120px;
+  border-radius: 6px;
   overflow: hidden;
 }
 
 .product-image {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -66,68 +67,66 @@
 }
 
 .product-card:hover .product-image {
-  transform: scale(1.05); /* Zoom nhẹ ảnh khi hover */
+  transform: scale(1.05);
 }
 
 .discount-badge {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background-color: #ff424e; /* Màu đỏ nổi bật cho giảm giá */
+  top: 6px;
+  left: 6px;
+  background-color: #ff424e;
   color: white;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: bold;
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: 4px;
   z-index: 1;
 }
 
 .product-info {
-  padding: 12px;
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Đẩy giá và nút xuống đáy */
+  justify-content: space-between;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.info-top {
+  display: block;
 }
 
 .product-name {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: #333;
   margin-bottom: 4px;
-  /* Kỹ thuật cắt chữ nếu quá 2 dòng */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.product-desc {
-  font-size: 12px;
-  color: #777;
-  margin-bottom: 8px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.product-stats {
-  margin-bottom: 12px;
+.product-desc {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sold-count {
-  font-size: 12px;
+  font-size: 11px;
   color: #888;
   background-color: #f5f5f5;
   padding: 2px 6px;
   border-radius: 4px;
 }
 
-.product-price-row {
+.info-bottom {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-top: auto; /* Luôn đẩy cụm này xuống sát đáy card */
+  margin-top: 8px;
 }
 
 .price-group {
@@ -138,30 +137,171 @@
 .current-price {
   font-size: 16px;
   font-weight: 700;
-  color: #c17a54; /* Màu đồng Trạm Thức */
+  color: #c17a54;
 }
 
 .original-price {
   font-size: 12px;
   color: #999;
-  text-decoration: line-through; /* Gạch ngang giá cũ */
-  margin-top: 2px;
+  text-decoration: line-through;
 }
 
-.add-to-cart-btn {
-  background-color: #c17a54;
-  color: white;
-  border: none;
-  width: 32px;
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-icon {
+  display: none;
+}
+
+.btn-text {
+  display: inline;
+}
+
+.add-cart-btn,
+.buy-now-btn {
+  cursor: pointer;
+}
+
+.add-cart-btn .btn-text {
+  background-color: white;
+  color: #c17a54;
+  border: 1px solid #c17a54;
+  padding: 0 12px;
+  font-weight: 600;
   height: 32px;
-  border-radius: 50%;
+  border-radius: 6px;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-cart-btn .btn-text:hover {
+  background-color: #fcf4f0;
+}
+
+.buy-now-btn .btn-text {
+  background-color: #c17a54;
+  color: white;
+  border: none;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
   transition: background-color 0.2s;
 }
 
-.add-to-cart-btn:hover {
+.buy-now-btn .btn-text:hover {
   background-color: #a86542;
+}
+
+@media (max-width: 768px) {
+  .bestsellers-grid {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    gap: 16px;
+    max-height: 205px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 5px;
+  }
+
+  .bestsellers-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .bestsellers-container {
+    padding: 15px;
+    box-shadow: none;
+    margin-top: 0px;
+  }
+
+  .bestsellers-header h2 {
+    font-size: 16px;
+  }
+
+  .view-all {
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+  }
+
+  .product-card {
+    flex: 0 0 auto;
+    padding: 10px;
+    gap: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .product-info {
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .product-name {
+    font-size: 14px;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.3;
+  }
+
+  .product-desc {
+    font-size: 12px;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+  }
+
+  .info-bottom {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+    margin-left: auto;
+  }
+
+  .buy-now-btn .btn-text,
+  .add-cart-btn .btn-text {
+    display: none;
+  }
+
+  .buy-now-btn .btn-icon,
+  .add-cart-btn .btn-icon {
+    display: block;
+  }
+
+  .action-buttons {
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .buy-now-btn,
+  .add-cart-btn {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #000;
+    border-radius: 50%;
+  }
 }

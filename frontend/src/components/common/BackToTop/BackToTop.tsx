@@ -20,7 +20,7 @@ const BackToTop = () => {
     return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
-  // Hàm xử lý cuộn lên đầu trang mượt mà
+  // Hàm xử lý cuộn lên đầu trang
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,

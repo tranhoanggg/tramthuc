@@ -8,7 +8,6 @@ const PORT = process.env.PORT || 10000;
 app.use(cors());
 app.use(express.json());
 
-// API lấy toàn bộ danh sách bộ sưu tập đang active
 app.get("/api/collections", (req, res) => {
   const sql =
     "SELECT * FROM collections WHERE is_active = TRUE ORDER BY id DESC";

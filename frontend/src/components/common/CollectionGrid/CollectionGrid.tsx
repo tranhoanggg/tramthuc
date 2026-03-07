@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import "./CollectionGrid.css";
 
-// Định nghĩa kiểu dữ liệu cho Bộ sưu tập
 interface Collection {
   id: number;
   title: string;
@@ -37,20 +36,27 @@ const CollectionGrid = () => {
 
   return (
     <div className="collection-container">
-      {/* Header của cột phải */}
       <div className="collection-header">
         <h2>Bộ sưu tập</h2>
         <a href="#" className="view-all">
-          Xem tất cả
+          <span>Xem tất cả</span>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
         </a>
       </div>
 
-      {/* Lưới chứa 4 ảnh */}
       <div className="collection-grid">
         {collections.map((item) => (
           <div key={item.id} className="collection-card">
             <div className="collection-image-wrapper">
-              {/* Dùng thẻ img thường để dễ nhận link ảnh ngoài như Unsplash */}
               <img
                 src={item.image_url}
                 alt={item.title}
