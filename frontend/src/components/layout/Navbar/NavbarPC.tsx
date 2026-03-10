@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import styles from "./NavbarPC.module.css";
 
 import logo from "../../../assets/images/logo.png";
 
 const NavbarPC = () => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("Cà phê");
 
   const [selectedCity, setSelectedCity] = useState("TP. HCM");
@@ -41,6 +43,7 @@ const NavbarPC = () => {
             alt="Trạm Thức"
             height={45}
             className={styles["navbar-logo"]}
+            onClick={() => router.push("/")}
           />
 
           <div className={styles["location-selector"]} ref={dropdownRef}>
@@ -82,7 +85,10 @@ const NavbarPC = () => {
             <li
               key={category}
               className={`${styles["nav-item"]} ${activeTab === category ? styles["active"] : ""}`}
-              onClick={() => setActiveTab(category)}
+              onClick={() => {
+                setActiveTab(category);
+                router.push(`/category/${category}`);
+              }}
             >
               {category}
             </li>
