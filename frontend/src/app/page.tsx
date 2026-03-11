@@ -1,5 +1,5 @@
 import React from "react";
-import "./page.css";
+import styles from "./page.module.css";
 import CollectionGrid from "../components/common/CollectionGrid/CollectionGrid";
 import BestSellers from "../components/common/BestSellers/BestSellers";
 import BackToTop from "../components/common/BackToTop/BackToTop";
@@ -16,17 +16,21 @@ export default function Home() {
   ];
 
   return (
-    <main className="home-wrapper">
+    <main className={styles["home-wrapper"]}>
       {/* Lớp nền tối phía sau */}
-      <div className="home-background"></div>
+      <div className={styles["home-background"]}></div>
 
-      <div className="home-container">
+      <div className={styles["home-container"]}>
         {/* CỘT TRÁI: Đứng im (Sticky) */}
-        <div className="left-column">
-          <h1 className="left-title">Đặt món nhanh gọn, chọn lựa thoả thích</h1>
-          <p className="left-subtitle">Sẵn sàng phục vụ từ 7:00 - 22:00</p>
+        <div className={styles["left-column"]}>
+          <h1 className={styles["left-title"]}>
+            Đặt món nhanh gọn, chọn lựa thoả thích
+          </h1>
+          <p className={styles["left-subtitle"]}>
+            Sẵn sàng phục vụ từ 7:00 - 22:00
+          </p>
 
-          <div className="search-box">
+          <div className={styles["search-box"]}>
             <input type="text" placeholder="Tìm đồ uống, món ăn nhẹ..." />
             <button>
               <svg
@@ -43,11 +47,11 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="category-tags">
+          <div className={styles["category-tags"]}>
             {quickCategories.map((cat, index) => (
               <span
                 key={index}
-                className={`tag ${index === 0 ? "active" : ""}`}
+                className={`${styles["tag"]} ${index === 0 ? styles["active"] : ""}`}
               >
                 {cat}
               </span>
@@ -56,9 +60,9 @@ export default function Home() {
         </div>
 
         {/* CỘT PHẢI: Cuộn được (Scrollable) */}
-        <div className="right-column">
+        <div className={styles["right-column"]}>
           {/* Ô chọn địa chỉ giao hàng */}
-          <div className="address-delivery">
+          <div className={styles["address-delivery"]}>
             <span>Chọn địa chỉ giao hàng</span>
             <svg
               width="16"

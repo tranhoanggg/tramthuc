@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import "./BestSellers.css";
+import styles from "./BestSellers.module.css";
 
 interface Product {
   id: number;
@@ -37,13 +37,14 @@ const BestSellers = () => {
     return new Intl.NumberFormat("vi-VN").format(price) + "đ";
   };
 
-  if (loading) return <div className="loading-text">Đang tải món ngon...</div>;
+  if (loading)
+    return <div className={styles["loading-text"]}>Đang tải món ngon...</div>;
 
   return (
-    <div className="bestsellers-container">
-      <div className="bestsellers-header">
+    <div className={styles["bestsellers-container"]}>
+      <div className={styles["bestsellers-header"]}>
         <h2>Bán chạy nhất</h2>
-        <a href="#" className="view-all">
+        <a href="#" className={styles["view-all"]}>
           <span>Xem tất cả</span>
           <svg
             width="16"
@@ -58,18 +59,18 @@ const BestSellers = () => {
         </a>
       </div>
 
-      <div className="bestsellers-grid">
+      <div className={styles["bestsellers-grid"]}>
         {products.map((product) => (
-          <div key={product.id} className="product-card">
-            <div className="product-image-wrapper">
+          <div key={product.id} className={styles["product-card"]}>
+            <div className={styles["product-image-wrapper"]}>
               <img
                 src={product.image_url}
                 alt={product.name}
-                className="product-image"
+                className={styles["product-image"]}
               />
               {product.original_price &&
                 product.original_price > product.price && (
-                  <span className="discount-badge">
+                  <span className={styles["discount-badge"]}>
                     -
                     {Math.round(
                       ((product.original_price - product.price) /
@@ -81,38 +82,41 @@ const BestSellers = () => {
                 )}
             </div>
 
-            <div className="product-info">
-              <div className="info-top">
-                <h3 className="product-name" title={product.name}>
+            <div className={styles["product-info"]}>
+              <div className={styles["info-top"]}>
+                <h3 className={styles["product-name"]} title={product.name}>
                   {product.name}
                 </h3>
-                <p className="product-desc" title={product.description}>
+                <p
+                  className={styles["product-desc"]}
+                  title={product.description}
+                >
                   {product.description}
                 </p>
-                <div className="product-stats">
-                  <span className="sold-count">
+                <div className={styles["product-stats"]}>
+                  <span className={styles["sold-count"]}>
                     Đã bán {product.sold_count}
                   </span>
                 </div>
               </div>
 
-              <div className="info-bottom">
-                <div className="price-group">
+              <div className={styles["info-bottom"]}>
+                <div className={styles["price-group"]}>
                   {product.original_price && (
-                    <span className="original-price">
+                    <span className={styles["original-price"]}>
                       {formatPrice(product.original_price)}
                     </span>
                   )}
-                  <span className="current-price">
+                  <span className={styles["current-price"]}>
                     {formatPrice(product.price)}
                   </span>
                 </div>
 
-                <div className="action-buttons">
-                  <div className="add-cart-btn" title="Thêm vào giỏ">
-                    <button className="btn-text">Thêm vào giỏ</button>
+                <div className={styles["action-buttons"]}>
+                  <div className={styles["add-cart-btn"]} title="Thêm vào giỏ">
+                    <button className={styles["btn-text"]}>Thêm vào giỏ</button>
                     <svg
-                      className="btn-icon"
+                      className={styles["btn-icon"]}
                       width="18"
                       height="18"
                       viewBox="0 0 24 24"
@@ -130,10 +134,10 @@ const BestSellers = () => {
                     </svg>
                   </div>
 
-                  <div className="buy-now-btn" title="Mua ngay">
-                    <button className="btn-text">Mua ngay</button>
+                  <div className={styles["buy-now-btn"]} title="Mua ngay">
+                    <button className={styles["btn-text"]}>Mua ngay</button>
                     <svg
-                      className="btn-icon"
+                      className={styles["btn-icon"]}
                       width="18"
                       height="18"
                       viewBox="0 0 24 24"

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import styles from "./NavbarPC.module.css";
 
@@ -9,7 +9,9 @@ import logo from "../../../assets/images/logo.png";
 
 const NavbarPC = () => {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("Cà phê");
+  const pathname = usePathname();
+
+  const [activeTab, setActiveTab] = useState("");
 
   const [selectedCity, setSelectedCity] = useState("TP. HCM");
   const [isCityOpen, setIsCityOpen] = useState(false);
@@ -17,6 +19,17 @@ const NavbarPC = () => {
 
   const categories = ["Cà phê", "Trà", "Đồ ăn vặt", "Quà tặng"];
   const cities = ["TP. HCM", "Hà Nội", "Đà Nẵng", "Huế", "Hải Phòng"];
+
+  useEffect(() => {
+    if (pathname.includes("/category/")) {
+      const currentCategory = pathname.split("/").pop();
+      if (currentCategory) {
+        setActiveTab(decodeURIComponent(currentCategory));
+      }
+    } else {
+      setActiveTab("");
+    }
+  }, [pathname]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

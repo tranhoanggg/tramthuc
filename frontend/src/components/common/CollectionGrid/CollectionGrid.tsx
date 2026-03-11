@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import "./CollectionGrid.css";
+import styles from "./CollectionGrid.module.css";
 
 interface Collection {
   id: number;
@@ -32,13 +32,13 @@ const CollectionGrid = () => {
   }, []);
 
   if (loading)
-    return <div className="loading-text">Đang tải bộ sưu tập...</div>;
+    return <div className={styles["loading-text"]}>Đang tải bộ sưu tập...</div>;
 
   return (
-    <div className="collection-container">
-      <div className="collection-header">
+    <div className={styles["collection-container"]}>
+      <div className={styles["collection-header"]}>
         <h2>Bộ sưu tập</h2>
-        <a href="#" className="view-all">
+        <a href="#" className={styles["view-all"]}>
           <span>Xem tất cả</span>
           <svg
             width="16"
@@ -53,19 +53,19 @@ const CollectionGrid = () => {
         </a>
       </div>
 
-      <div className="collection-grid">
+      <div className={styles["collection-grid"]}>
         {collections.map((item) => (
-          <div key={item.id} className="collection-card">
-            <div className="collection-image-wrapper">
+          <div key={item.id} className={styles["collection-card"]}>
+            <div className={styles["collection-image-wrapper"]}>
               <img
                 src={item.image_url}
                 alt={item.title}
-                className="collection-image"
+                className={styles["collection-image"]}
               />
             </div>
-            <div className="collection-info">
-              <h3 className="collection-title">{item.title}</h3>
-              <p className="collection-subtitle">{item.subtitle}</p>
+            <div className={styles["collection-info"]}>
+              <h3 className={styles["collection-title"]}>{item.title}</h3>
+              <p className={styles["collection-subtitle"]}>{item.subtitle}</p>
             </div>
           </div>
         ))}
