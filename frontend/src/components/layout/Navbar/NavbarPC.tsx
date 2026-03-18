@@ -122,7 +122,14 @@ const NavbarPC = () => {
             </svg>
           </div>
 
-          <button className={styles["login-btn"]}>Đăng nhập</button>
+          <button
+            className={styles["login-btn"]}
+            onClick={() => {
+              router.push(`/login`);
+            }}
+          >
+            Đăng nhập
+          </button>
         </div>
       </div>
     </nav>
