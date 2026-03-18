@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import styles from "./NavbarPC.module.css";
+import { useAuth } from "@/context/AuthContext"; // IMPORT AUTH CONTEXT
 
 import logo from "../../../assets/images/logo.png";
 
@@ -11,11 +12,18 @@ const NavbarPC = () => {
   const router = useRouter();
   const pathname = usePathname();
 
+  // Gọi Global State từ AuthContext
+  const { user, isAuthenticated, logoutContext } = useAuth();
+
   const [activeTab, setActiveTab] = useState("");
 
   const [selectedCity, setSelectedCity] = useState("TP. HCM");
   const [isCityOpen, setIsCityOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Thêm State và Ref cho Dropdown của User Profile
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const categories = ["Cà phê", "Trà", "Đồ ăn vặt", "Quà tặng"];
   const cities = ["TP. HCM", "Hà Nội", "Đà Nẵng", "Huế", "Hải Phòng"];
@@ -31,13 +39,22 @@ const NavbarPC = () => {
     }
   }, [pathname]);
 
+  // Cập nhật sự kiện click ra ngoài để đóng cả 2 menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Đóng menu chọn tỉnh thành
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node)
       ) {
         setIsCityOpen(false);
+      }
+      // Đóng menu User Profile
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsUserMenuOpen(false);
       }
     };
 
@@ -46,6 +63,13 @@ const NavbarPC = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  // Logic cắt chữ cái đầu để làm Avatar mặc định
+  const getInitials = (name: string) => {
+    if (!name) return "U";
+    const words = name.trim().split(" ");
+    return words[words.length - 1].charAt(0).toUpperCase();
+  };
 
   return (
     <nav className={styles["navbar"]}>
@@ -122,14 +146,86 @@ const NavbarPC = () => {
             </svg>
           </div>
 
-          <button
-            className={styles["login-btn"]}
-            onClick={() => {
-              router.push(`/login`);
-            }}
-          >
-            Đăng nhập
-          </button>
+          {/* HIỂN THỊ CÓ ĐIỀU KIỆN (CONDITIONAL RENDERING) */}
+          {!isAuthenticated ? (
+            <button
+              className={styles["login-btn"]}
+              onClick={() => {
+                router.push(`/login`);
+              }}
+            >
+              Đăng nhập
+            </button>
+          ) : (
+            <div className={styles["user-profile-wrapper"]} ref={userMenuRef}>
+              <div
+                className={styles["user-profile-trigger"]}
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              >
+                {/* Render Avatar hoặc Chữ cái */}
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt="Avatar"
+                    className={styles["user-avatar-img"]}
+                  />
+                ) : (
+                  <div className={styles["user-avatar-fallback"]}>
+                    {getInitials(user?.fullName || "")}
+                  </div>
+                )}
+
+                <span className={styles["user-name"]}>{user?.fullName}</span>
+
+                <svg
+                  className={`${styles["dropdown-icon"]} ${isUserMenuOpen ? styles["open"] : ""}`}
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                >
+                  <path d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06z"></path>
+                </svg>
+              </div>
+
+              {/* Menu Dropdown */}
+              {isUserMenuOpen && (
+                <div className={styles["user-dropdown-menu"]}>
+                  <div className={styles["user-dropdown-header"]}>
+                    <h4>{user?.fullName}</h4>
+                    <p>{user?.email || user?.phoneNumber}</p>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      router.push("/profile");
+                      setIsUserMenuOpen(false);
+                    }}
+                    className={styles["user-dropdown-item"]}
+                  >
+                    Thông tin tài khoản
+                  </button>
+                  <button
+                    onClick={() => {
+                      router.push("/orders");
+                      setIsUserMenuOpen(false);
+                    }}
+                    className={styles["user-dropdown-item"]}
+                  >
+                    Đơn hàng của tôi
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      logoutContext();
+                    }}
+                    className={`${styles["user-dropdown-item"]} ${styles["logout"]}`}
+                  >
+                    Đăng xuất
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </nav>

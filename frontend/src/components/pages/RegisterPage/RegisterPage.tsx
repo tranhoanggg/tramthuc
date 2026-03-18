@@ -17,6 +17,9 @@ export default function RegisterPageUI() {
   const [dob, setDob] = useState("");
   const [gender, setGender] = useState("Nam");
 
+  // LƯU TRỮ SỐ ĐIỆN THOẠI ĐÃ XÁC THỰC TỪ BÊN TRANG LOGIN
+  const [verifiedPhone, setVerifiedPhone] = useState("");
+
   // State quản lý Popup và Trạng thái
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otp, setOtp] = useState("");
@@ -31,20 +34,64 @@ export default function RegisterPageUI() {
   useEffect(() => {
     const emailFromUrl = searchParams.get("email");
     const nameFromUrl = searchParams.get("name");
+    const phoneFromUrl = searchParams.get("phone");
 
     if (emailFromUrl) {
-      setEmail(emailFromUrl); // Tự động điền vào ô Input Email
+      setEmail(emailFromUrl);
       setErrorMessage(
-        "Tài khoản Google của bạn chưa được đăng ký. Vui lòng hoàn tất thông tin bên dưới để tạo tài khoản!",
+        "Tài khoản Google của bạn chưa được đăng ký. Vui lòng hoàn tất thông tin bên dưới!",
       );
     }
-
     if (nameFromUrl) {
-      setFullName(nameFromUrl); // Tự động điền vào ô Họ và tên
+      setFullName(nameFromUrl);
+    }
+    // HỨNG SĐT TỪ TRANG ĐĂNG NHẬP CHUYỂN QUA
+    if (phoneFromUrl) {
+      setPhoneNumber(phoneFromUrl);
+      setVerifiedPhone(phoneFromUrl); // Đánh dấu đây là số "đã kiểm duyệt"
+      setErrorMessage(
+        "Số điện thoại của bạn chưa được đăng ký. Vui lòng hoàn tất thông tin bên dưới!",
+      );
     }
   }, [searchParams]);
 
-  // BƯỚC 1: XỬ LÝ KHI BẤM NÚT "ĐĂNG KÝ" TẠI FORM NGOÀI
+  // HÀM TIẾN HÀNH ĐĂNG KÝ TRỰC TIẾP (BỎ QUA POPUP OTP)
+  const handleDirectRegister = async () => {
+    setIsLoading(true);
+    const payload = {
+      fullName,
+      dob,
+      gender,
+      password,
+      email: email.trim(),
+      phoneNumber: phoneNumber.trim(),
+      otp: "", // Bỏ trống OTP vì đã xác thực ở trang Login rồi
+    };
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.text();
+
+      if (response.ok) {
+        setSuccessMessage(
+          "Đăng ký thành công! Đang chuyển hướng đến Đăng nhập...",
+        );
+        setTimeout(() => router.push("/login"), 2000);
+      } else {
+        setErrorMessage(data || "Đăng ký thất bại. Vui lòng thử lại!");
+      }
+    } catch (error) {
+      setErrorMessage("Lỗi kết nối máy chủ khi đăng ký!");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // XỬ LÝ KHI BẤM NÚT "ĐĂNG KÝ" TẠI FORM NGOÀI
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
@@ -55,35 +102,37 @@ export default function RegisterPageUI() {
       return;
     }
 
+    // LOGIC THÔNG MINH: KIỂM TRA XEM NGƯỜI DÙNG CÓ SỬA SĐT KHÔNG
+    if (phoneNumber.trim() !== "" && phoneNumber.trim() === verifiedPhone) {
+      // Nếu số hiện tại KHỚP với số đã xác nhận bên Login -> Cho qua luôn!
+      handleDirectRegister();
+      return;
+    }
+
+    // NẾU NGƯỜI DÙNG SỬA SĐT, HOẶC DÙNG EMAIL -> BẮT XÁC THỰC OTP NHƯ BÌNH THƯỜNG
     setIsLoading(true);
     const identifier = email.trim() ? email.trim() : phoneNumber.trim();
 
     try {
-      // 1. Gọi API gửi OTP trước
       const response = await fetch(`${API_BASE_URL}/api/auth/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier }),
       });
-
       const data = await response.text();
-
       if (response.ok) {
-        // Gửi thành công -> Mở Popup lên
-        setShowOtpModal(true);
+        setShowOtpModal(true); // Mở Popup yêu cầu OTP
       } else {
-        setErrorMessage(
-          data || "Lỗi gửi mã xác nhận. Vui lòng kiểm tra lại Email/SĐT!",
-        );
+        setErrorMessage(data || "Lỗi gửi mã xác nhận. Vui lòng kiểm tra lại!");
       }
     } catch (error) {
-      setErrorMessage("Lỗi kết nối máy chủ. Vui lòng thử lại sau!");
+      setErrorMessage("Lỗi kết nối máy chủ.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // BƯỚC 2: XỬ LÝ KHI BẤM "XÁC NHẬN" TRONG POPUP
+  // XỬ LÝ KHI BẤM "XÁC NHẬN" TRONG POPUP OTP (DÀNH CHO SĐT MỚI HOẶC EMAIL)
   const handleVerifyAndRegister = async () => {
     if (otp.length < 6) {
       alert("Vui lòng nhập đủ 6 số OTP!");
@@ -95,10 +144,10 @@ export default function RegisterPageUI() {
       fullName,
       dob,
       gender,
+      password,
+      otp,
       email: email.trim(),
       phoneNumber: phoneNumber.trim(),
-      password,
-      otp, // Đính kèm OTP người dùng vừa nhập trong Popup
     };
 
     try {
@@ -107,22 +156,17 @@ export default function RegisterPageUI() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       const data = await response.text();
 
       if (response.ok) {
-        setShowOtpModal(false); // Ẩn popup
-        setSuccessMessage(
-          "Đăng ký thành công! Đang chuyển hướng đến Đăng nhập...",
-        );
-        setTimeout(() => {
-          router.push("/login");
-        }, 2000);
+        setShowOtpModal(false);
+        setSuccessMessage("Đăng ký thành công! Đang chuyển hướng...");
+        setTimeout(() => router.push("/login"), 2000);
       } else {
-        alert(data || "Mã xác nhận không đúng hoặc đã hết hạn!");
+        alert(data || "Mã xác nhận không đúng!");
       }
     } catch (error) {
-      alert("Lỗi kết nối máy chủ khi đăng ký!");
+      alert("Lỗi kết nối máy chủ!");
     } finally {
       setIsLoading(false);
     }
@@ -140,7 +184,6 @@ export default function RegisterPageUI() {
           <div className={styles["success-alert"]}>{successMessage}</div>
         )}
 
-        {/* Form chính (Sẽ bị làm mờ nhẹ nếu đang mở Popup) */}
         <form
           className={`${styles["register-form"]} ${showOtpModal ? styles["form-blurred"] : ""}`}
           onSubmit={handleInitialSubmit}
@@ -191,6 +234,7 @@ export default function RegisterPageUI() {
           </div>
 
           <div className={styles["input-group"]}>
+            {/* Người dùng vẫn có thể sửa SĐT ở đây */}
             <input
               type="tel"
               placeholder="Số điện thoại"
@@ -227,7 +271,7 @@ export default function RegisterPageUI() {
         </div>
       </div>
 
-      {/* POPUP XÁC THỰC OTP */}
+      {/* POPUP XÁC THỰC OTP (CHỈ HIỆN KHI NGƯỜI DÙNG DÙNG EMAIL HOẶC ĐỔI SĐT MỚI) */}
       {showOtpModal && (
         <div className={styles["modal-overlay"]}>
           <div className={styles["modal-content"]}>
@@ -237,7 +281,6 @@ export default function RegisterPageUI() {
             >
               ✕
             </button>
-
             <div className={styles["modal-icon"]}>
               <svg
                 width="48"
@@ -251,14 +294,12 @@ export default function RegisterPageUI() {
                 <polyline points="22,6 12,13 2,6"></polyline>
               </svg>
             </div>
-
             <h2 className={styles["modal-title"]}>Xác thực tài khoản</h2>
             <p className={styles["modal-desc"]}>
               Chúng tôi vừa gửi một mã gồm 6 chữ số đến <br />
               <strong>{email.trim() ? email : phoneNumber}</strong>. <br />
-              Vui lòng kiểm tra và nhập mã vào bên dưới.
+              Vui lòng kiểm tra và nhập mã.
             </p>
-
             <input
               type="text"
               className={styles["otp-input-large"]}
@@ -268,7 +309,6 @@ export default function RegisterPageUI() {
               onChange={(e) => setOtp(e.target.value)}
               autoFocus
             />
-
             <button
               className={styles["verify-btn"]}
               onClick={handleVerifyAndRegister}
@@ -276,7 +316,6 @@ export default function RegisterPageUI() {
             >
               {isLoading ? "ĐANG XÁC THỰC..." : "XÁC NHẬN"}
             </button>
-
             <p className={styles["resend-text"]}>
               Không nhận được mã?{" "}
               <span onClick={handleInitialSubmit}>Gửi lại</span>
