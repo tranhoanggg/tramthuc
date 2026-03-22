@@ -72,6 +72,21 @@ app.get("/api/products/category/:categoryName", (req, res) => {
   });
 });
 
+app.get("/api/products", (req, res) => {
+  const sql =
+    "SELECT * FROM products WHERE is_active = TRUE ORDER BY created_at DESC";
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("❌ Lỗi khi lấy tất cả sản phẩm:", err);
+      return res
+        .status(500)
+        .json({ error: "Lỗi Server khi truy vấn dữ liệu sản phẩm" });
+    }
+    res.json(results);
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Server đang chạy tại port ${PORT}`);
 });
