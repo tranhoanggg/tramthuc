@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
 import styles from "./LoginPage.module.css";
 
 import { useAuth } from "@/context/AuthContext";
+import { useCartStore } from "@/store/useCartStore";
 
 export default function LoginPageUI() {
   const router = useRouter();
@@ -33,9 +34,11 @@ export default function LoginPageUI() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [forgotError, setForgotError] = useState("");
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [googleBtnWidth, setGoogleBtnWidth] = useState("400");
   const { loginContext } = useAuth();
 
-  const API_BASE_URL =
+  const apiUrl =
     process.env.NEXT_PUBLIC_AUTH_API_URL ||
     "https://tramthuc-authservice.onrender.com";
 
@@ -55,7 +58,7 @@ export default function LoginPageUI() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      const response = await fetch(`${apiUrl}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier: email, password }),
@@ -64,7 +67,7 @@ export default function LoginPageUI() {
       const data = await response.json();
 
       if (response.ok && data.token) {
-        loginContext(data.token);
+        loginContext(data.data.token);
 
         // LOGIC REMEMBER ME: Lưu hoặc Xóa id dựa vào Checkbox
         if (rememberMe) {
@@ -72,6 +75,9 @@ export default function LoginPageUI() {
         } else {
           localStorage.removeItem("tramthuc_remembered_id");
         }
+
+        console.log("Bắt đầu đồng bộ giỏ hàng lên Server...");
+        await useCartStore.getState().syncWithServer();
 
         alert("Đăng nhập thành công!");
         router.push("/");
@@ -92,7 +98,7 @@ export default function LoginPageUI() {
     const idToken = credentialResponse.credential;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
+      const response = await fetch(`${apiUrl}/api/auth/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
@@ -101,7 +107,11 @@ export default function LoginPageUI() {
 
       if (response.ok) {
         const data = JSON.parse(textData);
-        loginContext(data.token);
+        loginContext(data.data.token);
+
+        console.log("Bắt đầu đồng bộ giỏ hàng lên Server...");
+        await useCartStore.getState().syncWithServer();
+
         alert("Đăng nhập bằng Google thành công!");
         router.push("/");
       } else {
@@ -135,7 +145,7 @@ export default function LoginPageUI() {
     setPhoneError("");
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/send-otp`, {
+      const response = await fetch(`${apiUrl}/api/auth/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier: phoneInput }),
@@ -156,7 +166,7 @@ export default function LoginPageUI() {
     setPhoneError("");
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login-otp`, {
+      const response = await fetch(`${apiUrl}/api/auth/login-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier: phoneInput, otp: phoneOtp }),
@@ -165,7 +175,11 @@ export default function LoginPageUI() {
 
       if (response.ok) {
         const data = JSON.parse(textData);
-        loginContext(data.token);
+        loginContext(data.data.token);
+
+        console.log("Bắt đầu đồng bộ giỏ hàng lên Server...");
+        await useCartStore.getState().syncWithServer();
+
         alert("Đăng nhập thành công!");
         router.push("/");
       } else {
@@ -188,7 +202,7 @@ export default function LoginPageUI() {
     setForgotError("");
     setIsLoading(true);
     try {
-      const verifyRes = await fetch(`${API_BASE_URL}/api/auth/verify`, {
+      const verifyRes = await fetch(`${apiUrl}/api/auth/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier: forgotIdentifier }),
@@ -201,7 +215,7 @@ export default function LoginPageUI() {
         return;
       }
 
-      const otpRes = await fetch(`${API_BASE_URL}/api/auth/send-otp`, {
+      const otpRes = await fetch(`${apiUrl}/api/auth/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier: forgotIdentifier }),
@@ -228,7 +242,7 @@ export default function LoginPageUI() {
     setForgotError("");
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
+      const response = await fetch(`${apiUrl}/api/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -258,6 +272,21 @@ export default function LoginPageUI() {
     }
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        const currentWidth = containerRef.current.offsetWidth;
+        const finalWidth = currentWidth > 400 ? 400 : currentWidth;
+        setGoogleBtnWidth(String(finalWidth));
+      }
+    };
+
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <div className={styles["login-page-wrapper"]}>
       <div className={styles["login-container"]}>
@@ -279,7 +308,7 @@ export default function LoginPageUI() {
           </div>
         )}
 
-        <div className={styles["social-buttons"]}>
+        <div className={styles["social-buttons"]} ref={containerRef}>
           <div
             style={{
               display: "flex",
@@ -292,14 +321,14 @@ export default function LoginPageUI() {
               onSuccess={handleGoogleSuccess}
               onError={() => setErrorMessage("Đăng nhập Google thất bại!")}
               useOneTap
-              width="400"
+              width={googleBtnWidth}
             />
           </div>
 
           <button
             type="button"
             className={`${styles["social-btn"]} ${styles["phone-btn"]}`}
-            style={{ marginTop: "5px" }}
+            style={{ marginTop: "5px", width: "100%", maxWidth: "400px" }}
             onClick={() => {
               setShowPhoneModal(true);
               setPhoneStep(1);

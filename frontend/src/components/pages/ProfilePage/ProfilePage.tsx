@@ -13,9 +13,7 @@ export default function ProfilePageUI() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ===== CẤU HÌNH CLOUDINARY (THAY THÔNG TIN CỦA BẠN VÀO ĐÂY) =====
-  // 1. Xem "Cloud Name" ở góc phải trên cùng Dashboard Cloudinary
-  // 2. Tên Upload Preset (loại Unsigned) bạn vừa tạo ở mục Settings -> Upload
+  // ===== CẤU HÌNH CLOUDINARY =====
   const CLOUD_NAME = "doipopjgo";
   const UPLOAD_PRESET = "tramthuc_avatar";
 

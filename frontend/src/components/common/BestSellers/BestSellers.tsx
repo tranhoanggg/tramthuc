@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import styles from "./BestSellers.module.css";
 
+import AddToCartButton from "@/components/common/AddToCartButton/AddToCartButton";
+
 interface Product {
   id: number;
   name: string;
@@ -113,7 +115,15 @@ const BestSellers = () => {
                 </div>
 
                 <div className={styles["action-buttons"]}>
-                  <div className={styles["add-cart-btn"]} title="Thêm vào giỏ">
+                  <AddToCartButton
+                    className={styles["add-cart-btn"]}
+                    product={{
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      imageUrl: product.image_url,
+                    }}
+                  >
                     <button className={styles["btn-text"]}>Thêm vào giỏ</button>
                     <svg
                       className={styles["btn-icon"]}
@@ -132,7 +142,7 @@ const BestSellers = () => {
                       <line x1="12" y1="10" x2="16" y2="10"></line>
                       <line x1="14" y1="8" x2="14" y2="12"></line>
                     </svg>
-                  </div>
+                  </AddToCartButton>
 
                   <div className={styles["buy-now-btn"]} title="Mua ngay">
                     <button className={styles["btn-text"]}>Mua ngay</button>

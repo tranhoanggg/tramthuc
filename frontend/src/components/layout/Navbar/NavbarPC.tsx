@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import styles from "./NavbarPC.module.css";
-import { useAuth } from "@/context/AuthContext"; // IMPORT AUTH CONTEXT
+import { useAuth } from "@/context/AuthContext";
+import { useCartStore } from "@/store/useCartStore";
 
 import logo from "../../../assets/images/logo.png";
 
@@ -13,7 +14,9 @@ const NavbarPC = () => {
   const pathname = usePathname();
 
   // Gọi Global State từ AuthContext
-  const { user, isAuthenticated, logoutContext } = useAuth();
+  const { user, isAuthenticated, isLoadingAuth, logoutContext } = useAuth();
+  const cart = useCartStore((state) => state.cart);
+  const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
 
   const [activeTab, setActiveTab] = useState("");
 
@@ -146,23 +149,54 @@ const NavbarPC = () => {
             </svg>
           </div>
 
-          {/* HIỂN THỊ CÓ ĐIỀU KIỆN (CONDITIONAL RENDERING) */}
-          {!isAuthenticated ? (
+          <div
+            className={styles["cart-icon-wrapper"]}
+            onClick={() => router.push("/cart")}
+          >
+            <svg
+              className={styles["cart-icon"]}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+
+            {/* Nếu có đồ trong giỏ thì mới hiện bóng đỏ */}
+            {totalItems > 0 && (
+              <span className={styles["cart-badge"]}>{totalItems}</span>
+            )}
+          </div>
+
+          {isLoadingAuth ? (
+            // TRẠNG THÁI ĐANG KIỂM TRA TOKEN: Hiện nút đăng nhập nhưng bị disabled
+            <button
+              className={`${styles["login-btn"]} ${styles["loading"]}`}
+              disabled
+            >
+              Đang xác thực...
+            </button>
+          ) : !isAuthenticated ? (
+            // TRẠNG THÁI CHƯA ĐĂNG NHẬP
             <button
               className={styles["login-btn"]}
-              onClick={() => {
-                router.push(`/login`);
-              }}
+              onClick={() => router.push(`/login`)}
             >
               Đăng nhập
             </button>
           ) : (
+            // TRẠNG THÁI ĐÃ ĐĂNG NHẬP: Hiện Profile
             <div className={styles["user-profile-wrapper"]} ref={userMenuRef}>
+              {/* ... (Phần User Profile Trigger và Dropdown giữ nguyên như cũ) ... */}
               <div
                 className={styles["user-profile-trigger"]}
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               >
-                {/* Render Avatar hoặc Chữ cái */}
                 {user?.avatar ? (
                   <img
                     src={user.avatar}
@@ -174,9 +208,7 @@ const NavbarPC = () => {
                     {getInitials(user?.fullName || "")}
                   </div>
                 )}
-
                 <span className={styles["user-name"]}>{user?.fullName}</span>
-
                 <svg
                   className={`${styles["dropdown-icon"]} ${isUserMenuOpen ? styles["open"] : ""}`}
                   viewBox="0 0 16 16"
@@ -186,7 +218,6 @@ const NavbarPC = () => {
                 </svg>
               </div>
 
-              {/* Menu Dropdown */}
               {isUserMenuOpen && (
                 <div className={styles["user-dropdown-menu"]}>
                   <div className={styles["user-dropdown-header"]}>

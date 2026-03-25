@@ -74,7 +74,8 @@ export default function CategoryPageUI() {
       setLoading(true);
       try {
         const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:10000";
+          process.env.NEXT_PUBLIC_API_URL ||
+          "https://tramthuc-backend.onrender.com";
         const res = await fetch(
           `${apiUrl}/api/products/category/${rawCategory}?search=${searchQuery}&sort=${sortOption}`,
         );

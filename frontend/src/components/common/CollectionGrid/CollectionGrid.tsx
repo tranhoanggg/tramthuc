@@ -17,7 +17,7 @@ const CollectionGrid = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:10000";
 
     fetch(`${apiUrl}/api/collections`)
       .then((res) => res.json())

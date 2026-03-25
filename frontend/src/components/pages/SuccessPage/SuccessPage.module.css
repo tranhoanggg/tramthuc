@@ -1,0 +1,60 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  background: #fafafa;
+}
+.card {
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  max-width: 500px;
+  width: 90%;
+}
+.iconSuccess {
+  font-size: 50px;
+  color: #27ae60;
+  margin-bottom: 20px;
+}
+.iconError {
+  font-size: 50px;
+  color: #e74c3c;
+  margin-bottom: 20px;
+}
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+.message {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+.actionGroup {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.btnHome {
+  padding: 12px 24px;
+  background: #c17a54;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btnRetry {
+  padding: 12px 24px;
+  border: 1px solid #c17a54;
+  color: #c17a54;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
