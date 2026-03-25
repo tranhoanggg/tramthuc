@@ -282,6 +282,7 @@
     background: white;
     border-radius: 4px;
     overflow: hidden;
+    margin-top: 20px;
   }
 
   .search-box input {
@@ -308,6 +309,11 @@
   .ai-section {
     margin-top: 32px;
     margin-bottom: 0px;
+  }
+
+  .ai-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, auto);
   }
 
   .right-column {
