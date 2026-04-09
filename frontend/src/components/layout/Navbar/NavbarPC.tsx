@@ -13,6 +13,10 @@ const NavbarPC = () => {
   const router = useRouter();
   const pathname = usePathname();
 
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
+
   // Gọi Global State từ AuthContext
   const { user, isAuthenticated, isLoadingAuth, logoutContext } = useAuth();
   const cart = useCartStore((state) => state.cart);
@@ -241,6 +245,25 @@ const NavbarPC = () => {
                       <h4>{user?.fullName}</h4>
                       <p>{user?.email || user?.phoneNumber}</p>
                     </div>
+
+                    {/* === NÚT CHỈ DÀNH CHO ADMIN THÊM VÀO ĐÂY === */}
+                    {user?.role === "ROLE_ADMIN" && (
+                      <button
+                        onClick={() => {
+                          router.push("/admin/dashboard");
+                          setIsUserMenuOpen(false);
+                        }}
+                        className={styles["user-dropdown-item"]}
+                        style={{
+                          color: "#c17a54",
+                          fontWeight: "bold",
+                          backgroundColor: "#fffaf7",
+                          borderBottom: "1px solid #f0f0f0",
+                        }}
+                      >
+                        🛡️ Quản trị hệ thống
+                      </button>
+                    )}
 
                     <button
                       onClick={() => {

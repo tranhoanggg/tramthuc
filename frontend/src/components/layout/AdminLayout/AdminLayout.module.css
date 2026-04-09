@@ -1,0 +1,18 @@
+.sider {
+  box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);
+  z-index: 10;
+}
+
+.logo {
+  height: 32px;
+  margin: 16px;
+  background: #c17a54;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border-radius: 6px;
+  overflow: hidden;
+  white-space: nowrap;
+}
