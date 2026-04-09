@@ -24,6 +24,10 @@
   font-size: 14px;
   color: #007bff;
   text-decoration: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .bestsellers-grid {
@@ -155,19 +159,20 @@
   display: none;
 }
 
-.btn-text {
-  display: inline;
-}
-
 .add-cart-btn,
 .buy-now-btn {
   cursor: pointer;
+  border: 1px solid #c17a54;
+  border-radius: 6px;
+}
+
+.buy-now-btn {
+  background-color: #c17a54;
 }
 
 .add-cart-btn .btn-text {
   background-color: white;
   color: #c17a54;
-  border: 1px solid #c17a54;
   padding: 0 12px;
   font-weight: 600;
   height: 32px;
@@ -194,6 +199,9 @@
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .buy-now-btn .btn-text:hover {
@@ -301,7 +309,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 1px solid #000;
+    border: 1px solid #c17a54;
     border-radius: 50%;
+    background-color: #fff;
   }
 }

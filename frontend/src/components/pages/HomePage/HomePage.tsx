@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./HomePage.module.css";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCartStore } from "@/store/useCartStore";
+import { useAddressStore } from "@/store/useAddressStore";
 import CollectionGrid from "@/components/common/CollectionGrid/CollectionGrid";
 import BestSellers from "@/components/common/BestSellers/BestSellers";
 import BackToTop from "@/components/common/BackToTop/BackToTop";
@@ -40,19 +42,55 @@ const fallbackSuggestions = [
 ];
 
 export default function Home() {
-  const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const { user, isAuthenticated, token } = useAuth();
   const { addToCart } = useCartStore();
+
+  const { selectedAddress, setSelectedAddress } = useAddressStore();
+  const [addresses, setAddresses] = useState<any[]>([]);
+
+  // STATE DROPDOWN MỚI
+  const [dropdownOpen, setDropdownOpen] = useState<"mobile" | "desktop" | null>(
+    null,
+  );
+  const dropdownRefMobile = useRef<HTMLDivElement>(null);
+  const dropdownRefDesktop = useRef<HTMLDivElement>(null);
+
   const [aiSuggestions, setAiSuggestions] =
     useState<any[]>(fallbackSuggestions);
   const [timeLabel, setTimeLabel] = useState("");
   const [isLoadingAI, setIsLoadingAI] = useState(false);
 
-  // Slider state
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 1. Logic tính toán tiêu đề theo giờ
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_AUTH_API_URL ||
+    "https://tramthuc-authservice.onrender.com";
+
+  // Click ra ngoài để đóng Dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownOpen === "mobile" &&
+        dropdownRefMobile.current &&
+        !dropdownRefMobile.current.contains(e.target as Node)
+      ) {
+        setDropdownOpen(null);
+      }
+      if (
+        dropdownOpen === "desktop" &&
+        dropdownRefDesktop.current &&
+        !dropdownRefDesktop.current.contains(e.target as Node)
+      ) {
+        setDropdownOpen(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [dropdownOpen]);
+
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour >= 6 && hour < 11) setTimeLabel("buổi sáng tỉnh táo");
@@ -62,7 +100,6 @@ export default function Home() {
     else setTimeLabel("");
   }, []);
 
-  // 2. Gọi AI gợi ý 4 món
   useEffect(() => {
     const fetchHomeSuggestions = async () => {
       if (!timeLabel) return;
@@ -80,7 +117,6 @@ export default function Home() {
           }
         }
       } catch (error) {
-        console.error("Lỗi AI gợi ý:", error);
       } finally {
         setIsLoadingAI(false);
       }
@@ -111,17 +147,13 @@ export default function Home() {
     },
   ];
 
-  // 3. Auto-play slider
   const goToSlide = (index: number) => {
     if (isAnimating) return;
     setIsAnimating(true);
     setCurrentSlide(index);
     setTimeout(() => setIsAnimating(false), 600);
   };
-
-  const nextSlide = () => {
-    goToSlide((currentSlide + 1) % brandSlides.length);
-  };
+  const nextSlide = () => goToSlide((currentSlide + 1) % brandSlides.length);
 
   useEffect(() => {
     autoPlayRef.current = setInterval(nextSlide, 4000);
@@ -130,6 +162,92 @@ export default function Home() {
     };
   }, [currentSlide, isAnimating]);
 
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      if (!isAuthenticated || !token) return;
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/addresses`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const list = data.data || [];
+          setAddresses(list);
+
+          if (!selectedAddress && list.length > 0) {
+            const def = list.find((a: any) => a.isDefault) || list[0];
+            setSelectedAddress({
+              id: def.id,
+              receiverName: def.receiverName,
+              receiverPhone: def.receiverPhone,
+              fullAddress: def.fullAddress,
+              latitude: def.latitude,
+              longitude: def.longitude,
+            });
+          }
+        }
+      } catch (error) {}
+    };
+    fetchAddresses();
+  }, [isAuthenticated, token, selectedAddress, setSelectedAddress]);
+
+  const handleToggleDropdown = (type: "mobile" | "desktop") => {
+    if (!isAuthenticated) return router.push("/login");
+    setDropdownOpen((prev) => (prev === type ? null : type));
+  };
+
+  const handleSelectAddress = (addr: any) => {
+    setSelectedAddress({
+      id: addr.id,
+      receiverName: addr.receiverName,
+      receiverPhone: addr.receiverPhone,
+      fullAddress: addr.fullAddress,
+      latitude: addr.latitude,
+      longitude: addr.longitude,
+    });
+    setDropdownOpen(null); // Tắt dropdown sau khi chọn xong
+  };
+
+  // TÁCH GIAO DIỆN DROPDOWN ĐỂ DÙNG CHUNG CHO CẢ PC VÀ MOBILE
+  const renderAddressDropdown = () => (
+    <div className={styles["address-dropdown"]}>
+      {addresses.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "10px 0", color: "#666" }}>
+          Bạn chưa lưu địa chỉ nào. <br />
+          <span
+            style={{ color: "#c17a54", cursor: "pointer", fontWeight: "bold" }}
+            onClick={() => router.push("/profile")}
+          >
+            Thêm mới tại đây
+          </span>
+        </div>
+      ) : (
+        <div className={styles["address-list"]}>
+          {addresses.map((addr) => (
+            <div
+              key={addr.id}
+              className={`${styles["address-item"]} ${selectedAddress?.id === addr.id ? styles["active"] : ""}`}
+              onClick={() => handleSelectAddress(addr)}
+            >
+              <div className={styles["address-name"]}>
+                {addr.receiverName}
+                {addr.isDefault && (
+                  <span style={{ fontSize: "11px", color: "#2e7d32" }}>
+                    ⭐ Mặc định
+                  </span>
+                )}
+              </div>
+              <div className={styles["address-detail"]}>
+                {addr.receiverPhone}
+              </div>
+              <div className={styles["address-detail"]}>{addr.fullAddress}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <main className={styles["home-wrapper"]}>
       <div className={styles["home-background"]}></div>
@@ -137,24 +255,42 @@ export default function Home() {
       <div className={styles["home-container"]}>
         {/* CỘT TRÁI */}
         <div className={styles["left-column"]}>
-          {/* 1. Tiêu đề: Xin chào */}
           <h1 className={styles["left-title"]}>
             Xin chào
             {isAuthenticated && user?.fullName ? `, ${user.fullName}` : ""}!
           </h1>
 
-          <div className={`${styles.mobile} ${styles["address-delivery"]}`}>
-            <span>Chọn địa chỉ giao hàng</span>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+          {/* WRAPPER ĐỊA CHỈ CHO MOBILE */}
+          <div
+            className={`${styles["address-wrapper"]} ${styles["mobile-wrapper"]}`}
+            ref={dropdownRefMobile}
+          >
+            <div
+              className={styles["address-delivery"]}
+              onClick={() => handleToggleDropdown("mobile")}
             >
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+              <span>
+                Giao đến:{" "}
+                {selectedAddress ? (
+                  <span className={styles["text-truncate"]}>
+                    {selectedAddress.fullAddress}
+                  </span>
+                ) : (
+                  "Chọn địa chỉ..."
+                )}
+              </span>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </div>
+            {dropdownOpen === "mobile" && renderAddressDropdown()}
           </div>
 
           <div className={styles["search-box"]}>
@@ -174,7 +310,6 @@ export default function Home() {
             </button>
           </div>
 
-          {/* 2. Gợi ý thông minh (2x2) */}
           {timeLabel && (
             <div className={styles["ai-section"]}>
               <h2 className={styles["ai-title"]}>
@@ -206,15 +341,12 @@ export default function Home() {
             </div>
           )}
 
-          {/* 3. Brand Slider */}
           <div className={styles["brand-slider"]}>
             <div className={styles["slider-track"]}>
               {brandSlides.map((slide, idx) => (
                 <div
                   key={slide.id}
-                  className={`${styles["slide-box"]} ${
-                    idx === currentSlide ? styles["slide-active"] : ""
-                  }`}
+                  className={`${styles["slide-box"]} ${idx === currentSlide ? styles["slide-active"] : ""}`}
                 >
                   <img src={slide.img} alt={slide.title} />
                   <div className={styles["slide-overlay"]}>
@@ -223,17 +355,12 @@ export default function Home() {
                 </div>
               ))}
             </div>
-
-            {/* Dot indicators */}
             <div className={styles["slider-dots"]}>
               {brandSlides.map((_, idx) => (
                 <button
                   key={idx}
-                  className={`${styles["dot"]} ${
-                    idx === currentSlide ? styles["dot-active"] : ""
-                  }`}
+                  className={`${styles["dot"]} ${idx === currentSlide ? styles["dot-active"] : ""}`}
                   onClick={() => goToSlide(idx)}
-                  aria-label={`Slide ${idx + 1}`}
                 />
               ))}
             </div>
@@ -242,19 +369,39 @@ export default function Home() {
 
         {/* CỘT PHẢI */}
         <div className={styles["right-column"]}>
-          <div className={styles["address-delivery"]}>
-            <span>Chọn địa chỉ giao hàng</span>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+          {/* WRAPPER ĐỊA CHỈ CHO PC */}
+          <div
+            className={`${styles["address-wrapper"]} ${styles["desktop-wrapper"]}`}
+            ref={dropdownRefDesktop}
+          >
+            <div
+              className={styles["address-delivery"]}
+              onClick={() => handleToggleDropdown("desktop")}
             >
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+              <span>
+                Giao đến:{" "}
+                {selectedAddress ? (
+                  <span className={styles["text-truncate"]}>
+                    {selectedAddress.fullAddress}
+                  </span>
+                ) : (
+                  "Chọn địa chỉ giao hàng..."
+                )}
+              </span>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </div>
+            {dropdownOpen === "desktop" && renderAddressDropdown()}
           </div>
+
           <CollectionGrid />
           <BestSellers />
         </div>

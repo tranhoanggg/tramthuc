@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./BestSellers.module.css";
-
-import AddToCartButton from "@/components/common/AddToCartButton/AddToCartButton";
+import { useCartStore } from "@/store/useCartStore";
 
 interface Product {
   id: number;
@@ -17,6 +17,9 @@ interface Product {
 }
 
 const BestSellers = () => {
+  const router = useRouter();
+  const { addToCart } = useCartStore();
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,6 +42,32 @@ const BestSellers = () => {
     return new Intl.NumberFormat("vi-VN").format(price) + "đ";
   };
 
+  // 1. Logic Thêm vào giỏ hàng trực tiếp
+  const handleAddToCart = (product: Product) => {
+    addToCart({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      imageUrl: product.image_url,
+      quantity: 1,
+    });
+    alert(`Đã thêm ${product.name} vào giỏ hàng!`);
+  };
+
+  // 2. Logic Mua ngay truyền qua URL
+  const handleBuyNow = (product: Product) => {
+    const buyNowItem = {
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      imageUrl: product.image_url,
+      quantity: 1,
+    };
+
+    const query = encodeURIComponent(JSON.stringify(buyNowItem));
+    router.push(`/checkout?buyNow=${query}`);
+  };
+
   if (loading)
     return <div className={styles["loading-text"]}>Đang tải món ngon...</div>;
 
@@ -46,7 +75,10 @@ const BestSellers = () => {
     <div className={styles["bestsellers-container"]}>
       <div className={styles["bestsellers-header"]}>
         <h2>Bán chạy nhất</h2>
-        <a href="#" className={styles["view-all"]}>
+        <div
+          className={styles["view-all"]}
+          onClick={() => router.push("/search?all=true")}
+        >
           <span>Xem tất cả</span>
           <svg
             width="16"
@@ -58,7 +90,7 @@ const BestSellers = () => {
           >
             <path d="M9 18l6-6-6-6" />
           </svg>
-        </a>
+        </div>
       </div>
 
       <div className={styles["bestsellers-grid"]}>
@@ -114,17 +146,14 @@ const BestSellers = () => {
                   </span>
                 </div>
 
+                {/* KHU VỰC CẬP NHẬT: Tách biệt rõ ràng 2 nút */}
                 <div className={styles["action-buttons"]}>
-                  <AddToCartButton
+                  <button
                     className={styles["add-cart-btn"]}
-                    product={{
-                      id: product.id,
-                      name: product.name,
-                      price: product.price,
-                      imageUrl: product.image_url,
-                    }}
+                    onClick={() => handleAddToCart(product)}
+                    title="Thêm vào giỏ"
                   >
-                    <button className={styles["btn-text"]}>Thêm vào giỏ</button>
+                    <span className={styles["btn-text"]}>Thêm vào giỏ</span>
                     <svg
                       className={styles["btn-icon"]}
                       width="18"
@@ -142,10 +171,14 @@ const BestSellers = () => {
                       <line x1="12" y1="10" x2="16" y2="10"></line>
                       <line x1="14" y1="8" x2="14" y2="12"></line>
                     </svg>
-                  </AddToCartButton>
+                  </button>
 
-                  <div className={styles["buy-now-btn"]} title="Mua ngay">
-                    <button className={styles["btn-text"]}>Mua ngay</button>
+                  <button
+                    className={styles["buy-now-btn"]}
+                    onClick={() => handleBuyNow(product)}
+                    title="Mua ngay"
+                  >
+                    <span className={styles["btn-text"]}>Mua ngay</span>
                     <svg
                       className={styles["btn-icon"]}
                       width="18"
@@ -161,7 +194,7 @@ const BestSellers = () => {
                       <line x1="3" y1="6" x2="21" y2="6"></line>
                       <path d="M16 10a4 4 0 0 1-8 0"></path>
                     </svg>
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>

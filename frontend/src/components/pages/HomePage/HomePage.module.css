@@ -245,6 +245,90 @@
   cursor: pointer;
 }
 
+.address-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.desktop-wrapper {
+  display: block;
+}
+
+.mobile-wrapper {
+  display: none;
+}
+
+.address-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  padding: 16px;
+}
+
+.address-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 350px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  padding-right: 5px;
+}
+
+.address-list::-webkit-scrollbar {
+  width: 6px;
+}
+.address-list::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+.address-item {
+  padding: 14px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #fafafa;
+}
+
+.address-item:hover,
+.address-item.active {
+  border-color: #c17a54;
+  background: #fffaf7;
+}
+
+.address-name {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.address-detail {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 546px;
+  display: inline-block;
+  vertical-align: bottom;
+  color: #c17a54;
+  font-weight: 600;
+}
+
 .mobile.address-delivery {
   display: none;
 }
@@ -268,13 +352,8 @@
   }
 
   .left-title,
-  .brand-slider,
-  .address-delivery {
+  .brand-slider {
     display: none;
-  }
-
-  .mobile.address-delivery {
-    display: flex;
   }
 
   .search-box {
@@ -320,5 +399,18 @@
     flex: none;
     width: 100%;
     gap: 32px;
+  }
+
+  .desktop-wrapper {
+    display: none;
+  }
+
+  .mobile-wrapper {
+    display: block;
+    width: 100%;
+  }
+
+  .text-truncate {
+    max-width: 256px;
   }
 }

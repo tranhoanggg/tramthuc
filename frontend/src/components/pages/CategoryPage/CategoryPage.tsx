@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-// Import useRouter để làm nút Back
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import styles from "./CategoryPage.module.css";
+import { useCartStore } from "@/store/useCartStore";
 
-// Định nghĩa kiểu dữ liệu Product
 interface Product {
   id: number;
   name: string;
@@ -17,7 +16,6 @@ interface Product {
   sold_count: number;
 }
 
-// Danh sách các tùy chọn sắp xếp
 const sortOptions = [
   { value: "newest", label: "Mới nhất" },
   { value: "best_selling", label: "Bán chạy nhất" },
@@ -28,31 +26,83 @@ const sortOptions = [
 export default function CategoryPageUI() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
+
+  // 1. ĐỌC THAM SỐ TỪ URL
   const rawCategory = params?.categoryName as string;
   const decodedCategory = rawCategory ? decodeURIComponent(rawCategory) : "";
+
+  const globalSearchKeyword = searchParams.get("q");
+  const viewAll = searchParams.get("all");
+  const collectionTitle = searchParams.get("collectionTitle");
+
+  const { addToCart } = useCartStore();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // State cho Thanh Tìm kiếm và Dropdown Sắp xếp
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState("newest");
 
-  // State quản lý Custom Dropdown
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Lấy text hiển thị cho Dropdown
   const selectedSortLabel = sortOptions.find(
     (opt) => opt.value === sortOption,
   )?.label;
+
+  // 2. XÁC ĐỊNH TIÊU ĐỀ VÀ PLACEHOLDER THÔNG MINH
+  let pageTitle = decodedCategory;
+  let searchPlaceholder = `Tìm trong ${decodedCategory || "thực đơn"}...`;
+
+  if (collectionTitle) {
+    // Ưu tiên 1: Nếu đi từ Bộ sưu tập -> Lấy tên Bộ sưu tập làm Tiêu đề to
+    pageTitle = collectionTitle;
+  } else if (viewAll) {
+    // Ưu tiên 2: Xem tất cả
+    pageTitle = "Tất cả sản phẩm";
+    searchPlaceholder = "Tìm trong tất cả sản phẩm...";
+  } else if (globalSearchKeyword) {
+    // Ưu tiên 3: Tìm kiếm từ khóa
+    pageTitle = `Kết quả cho: "${globalSearchKeyword}"`;
+    searchPlaceholder = "Tìm thêm...";
+  }
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN").format(price) + "đ";
   };
 
-  // Tắt dropdown khi click ra ngoài
+  const handleAddToCart = (product: Product) => {
+    addToCart({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      imageUrl: product.image_url,
+      quantity: 1,
+    });
+    alert(`Đã thêm ${product.name} vào giỏ hàng!`);
+  };
+
+  const handleBuyNow = (product: Product) => {
+    const buyNowItem = {
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      imageUrl: product.image_url,
+      quantity: 1,
+    };
+    const query = encodeURIComponent(JSON.stringify(buyNowItem));
+    router.push(`/checkout?buyNow=${query}`);
+  };
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, [rawCategory, globalSearchKeyword, viewAll, collectionTitle]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -66,9 +116,26 @@ export default function CategoryPageUI() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Gọi API
+  // 3. LOGIC DEBOUNCE TÌM KIẾM (Chờ 600ms sau khi ngừng gõ mới cập nhật Query)
   useEffect(() => {
-    if (!rawCategory) return;
+    const delayDebounceFn = setTimeout(() => {
+      setSearchQuery(searchInput);
+    }, 600);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchInput]);
+
+  // Xử lý khi nhấn Enter (Tìm kiếm ngay lập tức không cần chờ)
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      setSearchQuery(searchInput);
+    }
+  };
+
+  // 4. GỌI API THÔNG MINH DỰA VÀO LUỒNG
+  useEffect(() => {
+    // Nếu không thuộc bất kỳ luồng nào thì bỏ qua
+    if (!rawCategory && !globalSearchKeyword && !viewAll) return;
 
     const fetchProducts = async () => {
       setLoading(true);
@@ -76,9 +143,23 @@ export default function CategoryPageUI() {
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL ||
           "https://tramthuc-backend.onrender.com";
-        const res = await fetch(
-          `${apiUrl}/api/products/category/${rawCategory}?search=${searchQuery}&sort=${sortOption}`,
-        );
+        let targetUrl = "";
+
+        // Nếu người dùng đang tìm kiếm toàn cục, kết hợp thêm searchQuery nội bộ nếu họ gõ thêm
+        const finalSearch = searchQuery || globalSearchKeyword || "";
+
+        if (viewAll) {
+          // LUỒNG 1: Xem tất cả
+          targetUrl = `${apiUrl}/api/products?search=${encodeURIComponent(searchQuery)}&sort=${sortOption}`;
+        } else if (globalSearchKeyword) {
+          // LUỒNG 2: Tìm kiếm toàn cục
+          targetUrl = `${apiUrl}/api/products?search=${encodeURIComponent(finalSearch)}&sort=${sortOption}`;
+        } else if (rawCategory) {
+          // LUỒNG 3: Xem theo Danh mục
+          targetUrl = `${apiUrl}/api/products/category/${rawCategory}?search=${encodeURIComponent(searchQuery)}&sort=${sortOption}`;
+        }
+
+        const res = await fetch(targetUrl);
         const data = await res.json();
         setProducts(data);
       } catch (err) {
@@ -89,20 +170,13 @@ export default function CategoryPageUI() {
     };
 
     fetchProducts();
-  }, [rawCategory, searchQuery, sortOption]);
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      setSearchQuery(searchInput);
-    }
-  };
+  }, [rawCategory, globalSearchKeyword, viewAll, searchQuery, sortOption]);
 
   return (
     <div className={styles["category-page-wrapper"]}>
       <div className={styles["category-container"]}>
         {/* KHU VỰC HEADER: Tiêu đề & Bộ lọc */}
         <div className={styles["category-header"]}>
-          {/* Cụm Tiêu đề + Nút Back (Chỉ hiện trên Mobile) */}
           <div className={styles["title-wrapper"]}>
             <button
               className={styles["back-btn"]}
@@ -123,15 +197,15 @@ export default function CategoryPageUI() {
                 <polyline points="12 19 5 12 12 5"></polyline>
               </svg>
             </button>
-            <h1 className={styles["category-title"]}>{decodedCategory}</h1>
+            <h1 className={styles["category-title"]}>{pageTitle}</h1>
           </div>
 
           <div className={styles["category-controls"]}>
-            {/* Thanh Tìm Kiếm */}
+            {/* Thanh Tìm Kiếm (Tự động search sau khi gõ) */}
             <div className={styles["search-box"]}>
               <input
                 type="text"
-                placeholder={`Tìm trong ${decodedCategory}...`}
+                placeholder={searchPlaceholder}
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -263,6 +337,7 @@ export default function CategoryPageUI() {
                     <div className={styles["cat-action-buttons"]}>
                       <button
                         className={styles["cat-add-btn"]}
+                        onClick={() => handleAddToCart(product)}
                         title="Thêm vào giỏ"
                       >
                         <svg
@@ -283,9 +358,9 @@ export default function CategoryPageUI() {
                         </svg>
                       </button>
 
-                      {/* Nút Mua ngay: Gắn cả Chữ và Icon để CSS xử lý */}
                       <button
                         className={styles["cat-buy-now-btn"]}
+                        onClick={() => handleBuyNow(product)}
                         title="Mua ngay"
                       >
                         <span className={styles["btn-text"]}>Mua ngay</span>

@@ -1,0 +1,240 @@
+.detail-wrapper {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.back-btn {
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.2s;
+}
+
+.back-btn:hover {
+  color: #c17a54;
+}
+
+.order-id-title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* KHỐI CHUNG CHO CÁC PHẦN */
+.section-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  border: 1px solid #f0f0f0;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #1a1a1a;
+}
+
+/* THANH TIMELINE TRẠNG THÁI */
+.timeline-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  position: relative;
+}
+
+.timeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+  z-index: 2;
+}
+
+.step-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  color: #aaa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-bottom: 10px;
+  border: 3px solid #fff;
+  transition: all 0.3s;
+}
+
+.step-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.step-title {
+  font-size: 13px;
+  color: #888;
+  font-weight: 500;
+}
+
+.step-time {
+  font-size: 11px;
+  color: #888;
+  font-weight: normal;
+  min-height: 16px;
+}
+
+.timeline-step.active .step-title {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.timeline-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  width: 100%;
+  height: 3px;
+  background: #f0f0f0;
+  z-index: -1;
+}
+
+/* Trạng thái Active */
+.timeline-step.active .step-icon {
+  background: #2e7d32;
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+}
+
+.timeline-step.active .step-label {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.timeline-step.active:not(:last-child)::after {
+  background: #2e7d32;
+}
+
+/* Đơn bị hủy */
+.cancelled-alert {
+  background: #ffebee;
+  color: #d32f2f;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* THÔNG TIN NHẬN HÀNG */
+.address-info p {
+  margin: 8px 0;
+  font-size: 15px;
+  line-height: 1.5;
+  display: flex;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #555;
+  width: 140px;
+  flex-shrink: 0;
+}
+
+/* DANH SÁCH SẢN PHẨM */
+.product-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px dashed #f0f0f0;
+}
+.product-item:last-child {
+  border-bottom: none;
+}
+
+.product-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  background: #eee;
+  object-fit: cover;
+  margin-right: 15px;
+}
+
+.product-details {
+  flex: 1;
+}
+
+.product-name {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.product-price-qty {
+  font-size: 14px;
+  color: #666;
+}
+
+.product-total {
+  font-weight: bold;
+  color: #c17a54;
+}
+
+/* TÓM TẮT THANH TOÁN */
+.summary-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+  margin-left: auto;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  color: #555;
+}
+
+.summary-row.total {
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.final-price {
+  color: #c17a54;
+  font-size: 22px;
+}
+
+.calculating-text {
+  font-size: 13px;
+  color: #0f83c9;
+  font-style: italic;
+}

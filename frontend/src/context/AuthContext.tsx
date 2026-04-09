@@ -81,6 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (isExpired) {
           logoutContext();
         } else {
+          setToken(savedToken);
           fetchUserProfile(savedToken);
         }
       } else {
@@ -121,6 +122,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     localStorage.removeItem("tramthuc_token");
     localStorage.removeItem("tramthuc_login_at");
+    sessionStorage.removeItem("pwd_verified");
     setToken(null);
     setUser(null);
     router.push("/");

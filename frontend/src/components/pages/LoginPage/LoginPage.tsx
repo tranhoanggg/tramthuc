@@ -61,17 +61,18 @@ export default function LoginPageUI() {
       const response = await fetch(`${apiUrl}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: email, password }),
+        // Thêm .trim() để chống lỗi dấu cách
+        body: JSON.stringify({ identifier: email.trim(), password }),
       });
 
       const data = await response.json();
 
-      if (response.ok && data.token) {
+      // SỬA Ở ĐÂY: Trỏ đúng vào data.data?.token
+      if (response.ok && data.data?.token) {
         loginContext(data.data.token);
 
-        // LOGIC REMEMBER ME: Lưu hoặc Xóa id dựa vào Checkbox
         if (rememberMe) {
-          localStorage.setItem("tramthuc_remembered_id", email);
+          localStorage.setItem("tramthuc_remembered_id", email.trim());
         } else {
           localStorage.removeItem("tramthuc_remembered_id");
         }
@@ -201,15 +202,20 @@ export default function LoginPageUI() {
   const handleForgotSendOtp = async () => {
     setForgotError("");
     setIsLoading(true);
+
+    // Thêm trim() để an toàn
+    const cleanIdentifier = forgotIdentifier.trim();
+
     try {
       const verifyRes = await fetch(`${apiUrl}/api/auth/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: forgotIdentifier }),
+        body: JSON.stringify({ identifier: cleanIdentifier }),
       });
       const verifyData = await verifyRes.json();
 
-      if (!verifyData.exists) {
+      // SỬA Ở ĐÂY: Trỏ đúng vào verifyData.data?.exists
+      if (!verifyData.data?.exists) {
         setForgotError("Tài khoản không tồn tại trên hệ thống!");
         setIsLoading(false);
         return;
@@ -218,11 +224,11 @@ export default function LoginPageUI() {
       const otpRes = await fetch(`${apiUrl}/api/auth/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: forgotIdentifier }),
+        body: JSON.stringify({ identifier: cleanIdentifier }),
       });
 
       if (otpRes.ok) {
-        setForgotStep(2); // Chuyển sang màn hình Nhập OTP
+        setForgotStep(2);
       } else {
         setForgotError((await otpRes.text()) || "Lỗi gửi mã OTP.");
       }
