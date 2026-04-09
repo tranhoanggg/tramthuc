@@ -175,8 +175,8 @@ app.get("/api/admin/dashboard/stats", isAdmin, async (req, res) => {
         FROM orders
         WHERE (payment_status = 'PAID' OR delivery_status = 'COMPLETED')
           AND created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-        GROUP BY DATE(created_at)
-        ORDER BY DATE(created_at) ASC
+        GROUP BY DATE_FORMAT(created_at, '%d/%m')
+        ORDER BY MIN(created_at) ASC
       `),
 
       // 6. DATA BIỂU ĐỒ TRÒN: Tỷ lệ món bán chạy theo Category
