@@ -212,6 +212,93 @@ app.get("/api/admin/dashboard/stats", isAdmin, async (req, res) => {
   }
 });
 
+// ==========================================
+// 1. LẤY DANH SÁCH TẤT CẢ ĐƠN HÀNG (Sắp xếp mới nhất lên đầu)
+// ==========================================
+app.get("/api/admin/orders", isAdmin, async (req, res) => {
+  try {
+    const sql = `
+      SELECT id, customer_name, customer_phone, shipping_address, 
+             total_amount, payment_method, payment_status, delivery_status, created_at, note
+      FROM orders 
+      ORDER BY created_at DESC
+    `;
+    const orders = await queryAsync(sql);
+
+    res.json({ success: true, data: orders });
+  } catch (error) {
+    console.error("❌ Lỗi lấy danh sách đơn hàng Admin:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Lỗi máy chủ khi lấy đơn hàng" });
+  }
+});
+
+// ==========================================
+// 2. XEM CHI TIẾT CÁC MÓN TRONG 1 ĐƠN HÀNG
+// ==========================================
+app.get("/api/admin/orders/:id/items", isAdmin, async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    // JOIN bảng order_items với products để lấy tên và ảnh món ăn
+    const sql = `
+      SELECT oi.id, oi.quantity, oi.price, p.name, p.image_url 
+      FROM order_items oi
+      JOIN products p ON oi.product_id = p.id
+      WHERE oi.order_id = ?
+    `;
+    const items = await queryAsync(sql, [orderId]);
+
+    res.json({ success: true, data: items });
+  } catch (error) {
+    console.error("❌ Lỗi lấy chi tiết đơn hàng:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Lỗi máy chủ khi lấy chi tiết đơn" });
+  }
+});
+
+// ==========================================
+// 3. CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG (Duyệt đơn, Hủy đơn...)
+// ==========================================
+app.put("/api/admin/orders/:id/status", isAdmin, async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const { delivery_status, payment_status } = req.body;
+
+    // Chỉ cập nhật những trường được gửi lên
+    let updates = [];
+    let params = [];
+
+    if (delivery_status) {
+      updates.push("delivery_status = ?");
+      params.push(delivery_status);
+    }
+    if (payment_status) {
+      updates.push("payment_status = ?");
+      params.push(payment_status);
+    }
+
+    if (updates.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Không có dữ liệu để cập nhật" });
+    }
+
+    params.push(orderId);
+
+    const sql = `UPDATE orders SET ${updates.join(", ")} WHERE id = ?`;
+    await queryAsync(sql, params);
+
+    res.json({ success: true, message: "Cập nhật đơn hàng thành công!" });
+  } catch (error) {
+    console.error("❌ Lỗi cập nhật trạng thái đơn hàng:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Lỗi máy chủ khi cập nhật đơn" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Server đang chạy tại port ${PORT}`);
 });
