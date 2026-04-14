@@ -21,7 +21,9 @@ const CollectionGrid = () => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:10000";
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL ||
+      "https://tramthuc-backend.onrender.com";
 
     fetch(`${apiUrl}/api/collections`)
       .then((res) => res.json())

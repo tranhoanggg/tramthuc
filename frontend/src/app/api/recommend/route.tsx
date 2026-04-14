@@ -10,7 +10,8 @@ export async function POST(req: Request) {
     let dynamicMenuString = "";
     try {
       const productApiUrl =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:10000";
+        process.env.NEXT_PUBLIC_API_URL ||
+        "https://tramthuc-backend.onrender.com";
       const menuResponse = await fetch(`${productApiUrl}/api/products`);
 
       if (menuResponse.ok) {

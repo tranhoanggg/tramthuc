@@ -51,7 +51,7 @@ export default function AdminLayout({
           alignItems: "center",
         }}
       >
-        <Spin size="large" tip="Đang kiểm tra quyền truy cập..." />
+        <Spin size="large" description="Đang kiểm tra quyền truy cập..." />
       </div>
     );
   }

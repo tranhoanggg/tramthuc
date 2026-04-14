@@ -24,7 +24,9 @@ const BestSellers = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:10000";
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL ||
+      "https://tramthuc-backend.onrender.com";
 
     fetch(`${apiUrl}/api/products/best-sellers`)
       .then((res) => res.json())

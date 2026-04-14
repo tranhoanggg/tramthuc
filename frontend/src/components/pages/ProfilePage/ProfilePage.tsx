@@ -306,7 +306,7 @@ export default function ProfilePageUI() {
         },
         body: JSON.stringify({
           receiverName: editModal.receiverName,
-          receiverPhone: editModal.receiverPhone,
+          receiverPhone: editModal.receiverPhone || null,
           fullAddress: editModal.fullAddress,
           latitude: editModal.lat,
           longitude: editModal.lng,
@@ -360,7 +360,7 @@ export default function ProfilePageUI() {
 
       // 2. Xử lý lưu địa chỉ
       if (pendingNewAddress) {
-        await fetch(`${API_BASE_URL}/api/addresses`, {
+        const addressRes = await fetch(`${API_BASE_URL}/api/addresses`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -368,7 +368,7 @@ export default function ProfilePageUI() {
           },
           body: JSON.stringify({
             receiverName: formData.fullName,
-            receiverPhone: formData.phoneNumber || "000",
+            receiverPhone: formData.phoneNumber || null,
             fullAddress: pendingNewAddress.fullAddress,
             latitude: pendingNewAddress.lat,
             longitude: pendingNewAddress.lng,
@@ -376,6 +376,16 @@ export default function ProfilePageUI() {
             default: true,
           }),
         });
+
+        if (!addressRes.ok) {
+          const errData = await addressRes.json();
+          alert(
+            "Lỗi thêm địa chỉ: " +
+              (errData.message || "Vui lòng kiểm tra lại Backend!"),
+          );
+          setIsSubmitting(false);
+          return;
+        }
       } else if (
         selectedAddressId &&
         selectedAddressId !== defaultAddress?.id

@@ -207,8 +207,11 @@ app.get("/api/admin/dashboard/stats", isAdmin, async (req, res) => {
           totalUsers: totalUsersResult[0]?.count || 0,
         },
         charts: {
-          revenueLast7Days: lineChartResult, // Array: [{date: "01/04", daily_revenue: 150000}, ...]
-          categorySales: pieChartResult, // Array: [{name: "Cà phê", value: 120}, ...]
+          revenueLast7Days: lineChartResult,
+          categorySales: pieChartResult.map((item) => ({
+            name: item.name,
+            value: Number(item.value),
+          })),
         },
       },
     });

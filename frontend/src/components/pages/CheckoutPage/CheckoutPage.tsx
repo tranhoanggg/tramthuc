@@ -33,12 +33,14 @@ function CheckoutContent() {
     receiverName: string;
     receiverPhone: string;
     fullAddress: string;
+    note: string;
     lat: number | null;
     lng: number | null;
   }>({
     receiverName: "",
     receiverPhone: "",
     fullAddress: "",
+    note: "",
     lat: null,
     lng: null,
   });
@@ -109,7 +111,8 @@ function CheckoutContent() {
         setFormData((prev) => ({
           ...prev,
           receiverName: selectedAddress.receiverName,
-          receiverPhone: selectedAddress.receiverPhone,
+          receiverPhone:
+            selectedAddress.receiverPhone || user?.phoneNumber || "",
           fullAddress: selectedAddress.fullAddress,
           lat: selectedAddress.latitude,
           lng: selectedAddress.longitude,
@@ -226,6 +229,7 @@ function CheckoutContent() {
       customerName: formData.receiverName,
       customerPhone: formData.receiverPhone,
       shippingAddress: formData.fullAddress,
+      note: formData.note,
       paymentMethod: paymentMethod,
       items: checkoutItems.map((item) => ({
         productId: item.productId,
@@ -355,6 +359,19 @@ function CheckoutContent() {
                     ))}
                   </ul>
                 )}
+
+                <div className={styles.formGroup} style={{ marginTop: "15px" }}>
+                  <label>Ghi chú đơn hàng (Tùy chọn)</label>
+                  <input
+                    type="text"
+                    className={styles.formInputNote}
+                    placeholder="Ví dụ: Ít đá, nhiều sữa, giao giờ hành chính..."
+                    value={formData.note}
+                    onChange={(e) =>
+                      setFormData({ ...formData, note: e.target.value })
+                    }
+                  />
+                </div>
               </div>
             </div>
           </div>

@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/useCartStore";
+import { useAddressStore } from "@/store/useAddressStore";
 
 export interface User {
   id: number;
@@ -106,6 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logoutContext = async () => {
     const token = localStorage.getItem("tramthuc_token");
     useCartStore.getState().clearLocalCartOnLogout();
+    useAddressStore.getState().clearSelectedAddress();
 
     if (token) {
       try {
@@ -122,6 +124,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     localStorage.removeItem("tramthuc_token");
     localStorage.removeItem("tramthuc_login_at");
+    localStorage.removeItem("tramthuc_selected_address");
     sessionStorage.removeItem("pwd_verified");
     setToken(null);
     setUser(null);

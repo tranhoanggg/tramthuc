@@ -86,30 +86,32 @@ export default function AdminDashboardPage() {
           <Row gutter={16} style={{ marginBottom: 24 }}>
             <Col span={6}>
               <Card
-                bordered={false}
+                variant="borderless"
                 style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
               >
                 <Statistic
                   title="Doanh thu hôm nay"
                   value={stats.overview.revenueToday}
                   formatter={(val) => formatVND(Number(val))}
-                  valueStyle={{ color: "#3f8600", fontWeight: "bold" }}
+                  styles={{ content: { color: "#3f8600", fontWeight: "bold" } }}
                   prefix={<DollarOutlined />}
                 />
               </Card>
             </Col>
             <Col span={6}>
               <Card
-                bordered={false}
+                variant="borderless"
                 style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
               >
                 <Statistic
                   title="Đơn hàng chờ xử lý"
                   value={stats.overview.pendingOrders}
-                  valueStyle={{
-                    color:
-                      stats.overview.pendingOrders > 0 ? "#cf1322" : "#333",
-                    fontWeight: "bold",
+                  styles={{
+                    content: {
+                      color:
+                        stats.overview.pendingOrders > 0 ? "#cf1322" : "#333",
+                      fontWeight: "bold",
+                    },
                   }}
                   prefix={<ClockCircleOutlined />}
                 />
@@ -117,20 +119,20 @@ export default function AdminDashboardPage() {
             </Col>
             <Col span={6}>
               <Card
-                bordered={false}
+                variant="borderless"
                 style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
               >
                 <Statistic
                   title="Tổng khách hàng"
                   value={stats.overview.totalUsers}
                   prefix={<UserOutlined />}
-                  valueStyle={{ fontWeight: "bold" }}
+                  styles={{ content: { fontWeight: "bold" } }}
                 />
               </Card>
             </Col>
             <Col span={6}>
               <Card
-                bordered={false}
+                variant="borderless"
                 style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
               >
                 <Statistic
@@ -138,7 +140,7 @@ export default function AdminDashboardPage() {
                   value={stats.overview.revenueMonth}
                   formatter={(val) => formatVND(Number(val))}
                   prefix={<ShoppingCartOutlined />}
-                  valueStyle={{ color: "#096dd9", fontWeight: "bold" }}
+                  styles={{ content: { color: "#096dd9", fontWeight: "bold" } }}
                 />
               </Card>
             </Col>
@@ -149,11 +151,11 @@ export default function AdminDashboardPage() {
             <Col span={16}>
               <Card
                 title="Doanh thu 7 ngày gần nhất"
-                bordered={false}
+                variant="borderless"
                 style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
               >
                 <div style={{ height: 300, width: "100%" }}>
-                  <ResponsiveContainer>
+                  <ResponsiveContainer width="100%" height={300}>
                     <LineChart
                       data={stats.charts.revenueLast7Days}
                       margin={{ top: 5, right: 20, bottom: 5, left: 20 }}
@@ -181,11 +183,11 @@ export default function AdminDashboardPage() {
             <Col span={8}>
               <Card
                 title="Tỷ lệ món bán chạy"
-                bordered={false}
+                variant="borderless"
                 style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
               >
                 <div style={{ height: 300, width: "100%" }}>
-                  <ResponsiveContainer>
+                  <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie
                         data={stats.charts.categorySales}
@@ -193,7 +195,7 @@ export default function AdminDashboardPage() {
                         cy="50%"
                         innerRadius={60}
                         outerRadius={100}
-                        paddingAngle={5}
+                        paddingAngle={0}
                         dataKey="value"
                       >
                         {stats.charts.categorySales.map(
