@@ -299,6 +299,92 @@ app.put("/api/admin/orders/:id/status", isAdmin, async (req, res) => {
   }
 });
 
+// 4. QUẢN LÝ SẢN PHẨM & TỒN KHO (ADMIN)
+
+// 4.1 Lấy toàn bộ danh sách sản phẩm (Bao gồm cả món đang ẩn)
+app.get("/api/admin/products", isAdmin, async (req, res) => {
+  try {
+    const sql = `SELECT * FROM products ORDER BY created_at DESC`;
+    const products = await queryAsync(sql);
+    res.json({ success: true, data: products });
+  } catch (error) {
+    console.error("❌ Lỗi lấy danh sách sản phẩm:", error);
+    res.status(500).json({ success: false, message: "Lỗi máy chủ!" });
+  }
+});
+
+// 4.2 Thêm sản phẩm mới
+app.post("/api/admin/products", isAdmin, async (req, res) => {
+  try {
+    const { name, description, price, category, image_url, stock } = req.body;
+    const sql = `
+      INSERT INTO products (name, description, price, category, image_url, stock, is_active, sold_count) 
+      VALUES (?, ?, ?, ?, ?, ?, TRUE, 0)
+    `;
+    await queryAsync(sql, [
+      name,
+      description,
+      price,
+      category,
+      image_url,
+      stock,
+    ]);
+    res.json({ success: true, message: "Thêm sản phẩm thành công!" });
+  } catch (error) {
+    console.error("❌ Lỗi thêm sản phẩm:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Lỗi máy chủ khi thêm sản phẩm!" });
+  }
+});
+
+// 4.3 Cập nhật thông tin & tồn kho sản phẩm
+app.put("/api/admin/products/:id", isAdmin, async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const { name, description, price, category, image_url, stock, is_active } =
+      req.body;
+
+    const sql = `
+      UPDATE products 
+      SET name = ?, description = ?, price = ?, category = ?, image_url = ?, stock = ?, is_active = ?
+      WHERE id = ?
+    `;
+    await queryAsync(sql, [
+      name,
+      description,
+      price,
+      category,
+      image_url,
+      stock,
+      is_active,
+      productId,
+    ]);
+    res.json({ success: true, message: "Cập nhật sản phẩm thành công!" });
+  } catch (error) {
+    console.error("❌ Lỗi cập nhật sản phẩm:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Lỗi máy chủ khi cập nhật!" });
+  }
+});
+
+// 4.4 Xóa (Ẩn) sản phẩm
+app.delete("/api/admin/products/:id", isAdmin, async (req, res) => {
+  try {
+    const productId = req.params.id;
+    // Thay vì xóa hẳn (Hard Delete) gây lỗi các đơn hàng cũ, ta chỉ ẩn nó đi (Soft Delete)
+    const sql = `UPDATE products SET is_active = FALSE WHERE id = ?`;
+    await queryAsync(sql, [productId]);
+    res.json({ success: true, message: "Đã ẩn sản phẩm khỏi cửa hàng!" });
+  } catch (error) {
+    console.error("❌ Lỗi xóa sản phẩm:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Lỗi máy chủ khi xóa sản phẩm!" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Server đang chạy tại port ${PORT}`);
 });
