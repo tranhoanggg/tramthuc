@@ -58,6 +58,9 @@ app.get("/api/products/best-sellers", (req, res) => {
   });
 });
 
+// ==========================================
+// API: LẤY SẢN PHẨM THEO DANH MỤC (Có Search & Sort)
+// ==========================================
 app.get("/api/products/category/:categoryName", (req, res) => {
   const categoryName = req.params.categoryName;
   const decodedCategory = decodeURIComponent(categoryName);
@@ -69,10 +72,11 @@ app.get("/api/products/category/:categoryName", (req, res) => {
   let params = [decodedCategory];
 
   if (search) {
-    sql += " AND name LIKE ?";
-    params.push(`%${search}%`);
+    sql += " AND (LOWER(name) LIKE LOWER(?) OR LOWER(category) LIKE LOWER(?))";
+    params.push(`%${search}%`, `%${search}%`);
   }
 
+  // Logic Sắp xếp
   if (sort === "price_asc") {
     sql += " ORDER BY price ASC";
   } else if (sort === "price_desc") {
@@ -94,6 +98,9 @@ app.get("/api/products/category/:categoryName", (req, res) => {
   });
 });
 
+// ==========================================
+// API: LẤY TẤT CẢ SẢN PHẨM (Có Search & Sort)
+// ==========================================
 app.get("/api/products", (req, res) => {
   const search = req.query.search;
   const sort = req.query.sort;
@@ -102,10 +109,11 @@ app.get("/api/products", (req, res) => {
   let params = [];
 
   if (search) {
-    sql += " AND name LIKE ?";
-    params.push(`%${search}%`);
+    sql += " AND (LOWER(name) LIKE LOWER(?) OR LOWER(category) LIKE LOWER(?))";
+    params.push(`%${search}%`, `%${search}%`);
   }
 
+  // Logic Sắp xếp
   if (sort === "price_asc") {
     sql += " ORDER BY price ASC";
   } else if (sort === "price_desc") {
